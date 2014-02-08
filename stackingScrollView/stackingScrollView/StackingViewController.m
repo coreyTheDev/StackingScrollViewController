@@ -130,7 +130,7 @@
         //[nextViewToStack setFrame:CGRectMake(nextViewToStack.frame.origin.x, scrollView.contentOffset.y + stackingGate, nextViewToStack.frame.size.width, nextViewToStack.frame.size.height)];
         [nextViewToStack removeFromSuperview];
         previousFrame = nextViewToStack.frame;
-        [nextViewToStack setFrame:CGRectMake(500, stackingGate, nextViewToStack.frame.size.width, nextViewToStack.frame.size.height)];
+        [nextViewToStack setFrame:CGRectMake(0, stackingGate, nextViewToStack.frame.size.width, nextViewToStack.frame.size.height)];
         [_contentView addSubview:nextViewToStack];
         indexOfNextViewToStack++;
         stackingGate += nextViewToStack.frame.size.height;
