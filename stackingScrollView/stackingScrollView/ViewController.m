@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import "StackingViewController.h"
 
-#define STACKING_GATE_OFFSET 30.0
+#define STACKING_GATE_OFFSET 0.0
 @interface ViewController ()
 @property (nonatomic, strong) StackingViewController *stackingScrollViewController;
 @end
@@ -41,11 +41,24 @@
     
     testView = [[UIView alloc]initWithFrame:CGRectMake(0, 600, 500, 600)];
     [testView setBackgroundColor:[UIColor purpleColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:NO];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1800, 500, 200)];
+    [testView setBackgroundColor:[UIColor blueColor]];
     [self.stackingScrollViewController insertView:testView withStacking:YES];
     
     testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1200, 500, 600)];
     [testView setBackgroundColor:[UIColor yellowColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:NO];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1200, 500, 200)];
+    [testView setBackgroundColor:[UIColor redColor]];
     [self.stackingScrollViewController insertView:testView withStacking:YES];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1200, 500, 1000)];
+    [testView setBackgroundColor:[UIColor blackColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:NO];
+    
 }
 
 @end

@@ -11,17 +11,23 @@
 @interface StackingViewController ()<UIScrollViewDelegate>
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) NSMutableArray *stackingViews;
+@property (nonatomic, strong) UIView *contentView;
 @end
 
 @implementation StackingViewController
 {
+    
     CGRect boundingRect;
     NSInteger stackingGate;
     
-    UIView *nextViewToStack;
-    NSInteger indexOfNextView;
+    UIView *nextViewToStack;//get from array
+    NSInteger indexOfNextViewToStack;
     UIView *lastViewInserted;//only kept to easily adjust the content size of the scrollview
-    CGRect originalFrame;
+    UIView *lastViewStacked;
+    CGRect nextFrame;//get from array
+    CGRect previousFrame;
+    NSMutableArray *verticalOriginsOfStackingViews;
+    NSMutableArray *stackedGhostViews;
 }
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -55,6 +61,12 @@
     [_scrollView setUserInteractionEnabled:YES];
     [_scrollView setScrollEnabled:YES];
     [self.view addSubview:_scrollView];
+    
+    _contentView = [[UIView alloc]initWithFrame:self.view.frame];
+    [_contentView setUserInteractionEnabled:NO];
+    [[self view] addSubview:_contentView];
+    
+    stackedGhostViews = [[NSMutableArray alloc]init];
 }
 
 - (void)didReceiveMemoryWarning
@@ -79,11 +91,16 @@
      */
     [_scrollView addSubview:view];
     [view setFrame:CGRectMake(0, _scrollView.contentSize.height, view.frame.size.width, view.frame.size.height)];
-    if (stacking && !nextViewToStack)
+    if (stacking)
     {
-        nextViewToStack = view;
-        originalFrame = nextViewToStack.frame;
+        if (!nextViewToStack)
+        {
+            nextViewToStack = view;
+        }
+        nextFrame = nextViewToStack.frame;
         [_stackingViews addObject:view];
+        UIView *ghostView = [[UIView alloc]initWithFrame:view.frame];
+        [stackedGhostViews addObject:ghostView];
     }
     //TODO:
     lastViewInserted = view;
@@ -97,21 +114,64 @@
 }
 
 #pragma mark - ScrollView delegate methods
+//on scroll view did scroll we need to check the gate against two views at any given time:
+//the next view to stack and the last view stacked
+//we know if the last view stacked is lower than the gate we change him to the next view to stack and give him his original frame back
+//similarly if the nextviewtostack is higher than the gate we change him to last view stacked and get the next view to stack.
+//Issue.... I don't know if I can do
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     //check next stacking view
-    if (scrollView.contentOffset.y + stackingGate >= originalFrame.origin.y)
+    
+    if ((scrollView.contentOffset.y + stackingGate > nextFrame.origin.y) && nextViewToStack)
     {
         //freeze view
-        [nextViewToStack setFrame:CGRectMake(nextViewToStack.frame.origin.x, scrollView.contentOffset.y + stackingGate, nextViewToStack.frame.size.width, nextViewToStack.frame.size.height)];
+        //remove view from scrollview and place in contentview at 0,gate
+        //[nextViewToStack setFrame:CGRectMake(nextViewToStack.frame.origin.x, scrollView.contentOffset.y + stackingGate, nextViewToStack.frame.size.width, nextViewToStack.frame.size.height)];
+        [nextViewToStack removeFromSuperview];
+        previousFrame = nextViewToStack.frame;
+        [nextViewToStack setFrame:CGRectMake(500, stackingGate, nextViewToStack.frame.size.width, nextViewToStack.frame.size.height)];
+        [_contentView addSubview:nextViewToStack];
+        indexOfNextViewToStack++;
+        stackingGate += nextViewToStack.frame.size.height;
+        //now.... we need to grab the next view to stack to test
+        lastViewStacked = nextViewToStack;
+        if (!(indexOfNextViewToStack >= _stackingViews.count))
+        {
+            nextViewToStack = (UIView *)[_stackingViews objectAtIndex:indexOfNextViewToStack];
+            nextFrame = nextViewToStack.frame;
+            
+        } else
+        {
+            nextViewToStack = nil;
+        }
         //bring view to front
-        [self.scrollView bringSubviewToFront:nextViewToStack];
+        //[self.scrollView bringSubviewToFront:nextViewToStack];
         //adjust nextView
         
     }
-    else if (scrollView.contentOffset.y + stackingGate < originalFrame.origin.y)
+    else if (indexOfNextViewToStack != 0)
     {
-        [nextViewToStack setFrame:originalFrame];
+        if ((scrollView.contentOffset.y + stackingGate - previousFrame.size.height < previousFrame.origin.y) && (![[_scrollView subviews]containsObject:lastViewStacked]))
+        {
+            [lastViewStacked removeFromSuperview];
+            [lastViewStacked setFrame:previousFrame];
+            [_scrollView addSubview:lastViewStacked];
+            //reset Next View to stack
+            nextViewToStack = lastViewStacked;
+            nextFrame = previousFrame;
+            stackingGate -= previousFrame.size.height;
+            indexOfNextViewToStack --;
+            if (indexOfNextViewToStack == 0)
+            {
+                lastViewStacked = nil;
+            }
+            else {
+                lastViewStacked = [_stackingViews objectAtIndex:indexOfNextViewToStack -1];
+                UIView *ghostView = (UIView *)[stackedGhostViews objectAtIndex:indexOfNextViewToStack -1];
+                previousFrame = ghostView.frame;
+            }
+        }
     }
 }
 @end
