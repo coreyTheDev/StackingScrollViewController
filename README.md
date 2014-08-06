@@ -8,8 +8,39 @@ Usage
 ============================
 
 ##Initializing the StackingScrollView
-    self.stackingScrollViewController = [[StackingViewController alloc]initWithFrame:self.view.frame stackingGate:STACKING_GATE_OFFSET];
+    self.stackingScrollViewController = [[StackingViewController alloc]initWithFrame:self.view.frame stackingGate:0];
     [self.view addSubview:self.stackingScrollViewController.view];
     [self addChildViewController:self.stackingScrollViewController];
+
+The constructor for the stacking scrollview takes in 2 parameters, the frame for the scrollview (all of which will be scrollable) and the stacking Gate. The stacking gate is if you don't want views to remain fixed to the top of the scrollview but offset by a certain distance. 
+
+##Inserting Views 
+
+    CGRect screenRect = [[UIScreen mainScreen] bounds];
+    CGFloat screenWidth = screenRect.size.width;
+    
+    UIView *testView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, screenWidth, 50)];
+    [testView setBackgroundColor:[UIColor redColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:YES];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 600, screenWidth, 300)];
+    [testView setBackgroundColor:[UIColor grayColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:NO];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1800, screenWidth, 50)];
+    [testView setBackgroundColor:[UIColor blueColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:YES];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1200, screenWidth, 300)];
+    [testView setBackgroundColor:[UIColor grayColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:NO];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1200, screenWidth, 50)];
+    [testView setBackgroundColor:[UIColor greenColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:YES];
+    
+    testView = [[UIView alloc]initWithFrame:CGRectMake(0, 1200, screenWidth, 1000)];
+    [testView setBackgroundColor:[UIColor grayColor]];
+    [self.stackingScrollViewController insertView:testView withStacking:NO];
     
     
